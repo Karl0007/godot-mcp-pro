@@ -57,21 +57,22 @@ const cliAliases: Record<string, { path: string[]; summary: string }> = {
 const exactStringFields = new Set([
   'action', 'animation', 'button', 'code', 'file_path', 'filter', 'group_filter', 'key', 'keycode', 'mode',
   'name', 'node_path', 'path', 'pattern', 'player_path', 'property', 'query', 'scene_path', 'script',
-  'script_filter', 'signal_name', 'type', 'type_filter', 'uid', 'value', 'camera_path', 'resource_type',
+  'script_filter', 'signal_name', 'type', 'type_filter', 'uid', 'camera_path', 'resource_type',
   'shader_path', 'preset_name', 'root_type', 'root_name', 'method', 'text', 'target', 'parent_path',
 ]);
-const objectFields = new Set(['position', 'rotation_degrees', 'look_at', 'target', 'stylebox', 'environment']);
+const objectFields = new Set(['direction', 'emission_box_extents', 'environment', 'gravity', 'look_at', 'params', 'position', 'properties', 'rotation', 'rotation_degrees', 'stylebox', 'target']);
 const arrayFields = new Set(['actions', 'children', 'events', 'groups', 'nodes', 'node_paths', 'properties', 'replacements', 'signal_filter', 'steps']);
 const booleanFields = new Set(['allow_unsafe_editor_io', 'alt', 'auto_release', 'debug', 'double_click', 'dry_run', 'exclude_addons', 'force', 'half_resolution', 'include_addons', 'include_builtin', 'launch', 'loop', 'named_only', 'one_shot', 'partial', 'pressed', 'recursive', 'run', 'shift', 'skip_export', 'ctrl']);
 const integerFields = new Set(['alternative', 'atlas_x', 'atlas_y', 'button', 'button_mask', 'count', 'duration_ms', 'frame_count', 'frame_delay', 'frame_interval', 'index', 'layer', 'max_count', 'max_depth', 'max_lines', 'max_results', 'preset_index', 'source_id', 'surface_index', 'threshold']);
-const numberSuffixes = ['_angle', '_attenuation', '_damping', '_db', '_density', '_depth', '_distance', '_easing', '_energy', '_explosiveness', '_far', '_feedback', '_fov', '_gain', '_height', '_hz', '_intensity', '_lifetime', '_length', '_mix', '_ms', '_near', '_radius', '_ratio', '_scale', '_size', '_speed', '_spread', '_strength', '_time', '_us', '_value', '_velocity', '_width', '_x', '_y', '_z'];
+const numberFields = new Set(['damping', 'depth', 'drive', 'dry', 'feedback', 'gain', 'mix', 'ratio', 'resonance', 'sky_curve', 'spread', 'sun_angle_max', 'wet']);
+const numberSuffixes = ['_angle', '_attenuation', '_damping', '_db', '_density', '_depth', '_distance', '_easing', '_energy', '_explosiveness', '_far', '_feedback', '_fov', '_gain', '_height', '_hz', '_intensity', '_lifetime', '_length', '_mix', '_ms', '_near', '_radius', '_ratio', '_scale', '_size', '_speed', '_spread', '_strength', '_time', '_us', '_velocity', '_width', '_x', '_y', '_z'];
 
 function inferType(name: string): PropertySchema {
   if (objectFields.has(name)) return { type: 'object', additionalProperties: true } as PropertySchema;
   if (arrayFields.has(name)) return { type: 'array', items: {} };
   if (booleanFields.has(name) || name.startsWith('is_') || name.startsWith('use_') || name.endsWith('_enabled') || name.endsWith('_active')) return { type: 'boolean' };
   if (integerFields.has(name) || name.endsWith('_index') || name.endsWith('_count') || name.endsWith('_id') || name.endsWith('_mask')) return { type: 'integer' };
-  if (numberSuffixes.some((suffix) => name.endsWith(suffix))) return { type: 'number' };
+  if (numberFields.has(name) || numberSuffixes.some((suffix) => name.endsWith(suffix))) return { type: 'number' };
   if (exactStringFields.has(name) || name.endsWith('_path') || name.endsWith('_name') || name.endsWith('_type')) return { type: 'string' };
   return {} as PropertySchema;
 }

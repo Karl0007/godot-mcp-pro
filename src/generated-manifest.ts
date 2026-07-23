@@ -78,10 +78,18 @@ export const GENERATED_TOOL_MANIFEST: readonly ToolManifestEntry[] = [
         "room_size": {
           "type": "number"
         },
-        "damping": {},
-        "wet": {},
-        "dry": {},
-        "spread": {},
+        "damping": {
+          "type": "number"
+        },
+        "wet": {
+          "type": "number"
+        },
+        "dry": {
+          "type": "number"
+        },
+        "spread": {
+          "type": "number"
+        },
         "voice_count": {
           "type": "integer"
         },
@@ -106,15 +114,21 @@ export const GENERATED_TOOL_MANIFEST: readonly ToolManifestEntry[] = [
         "threshold": {
           "type": "integer"
         },
-        "ratio": {},
+        "ratio": {
+          "type": "number"
+        },
         "attack_us": {
           "type": "number"
         },
         "release_ms": {
           "type": "number"
         },
-        "gain": {},
-        "mix": {},
+        "gain": {
+          "type": "number"
+        },
+        "mix": {
+          "type": "number"
+        },
         "ceiling_db": {
           "type": "number"
         },
@@ -136,8 +150,12 @@ export const GENERATED_TOOL_MANIFEST: readonly ToolManifestEntry[] = [
         "rate_hz": {
           "type": "number"
         },
-        "feedback": {},
-        "depth": {},
+        "feedback": {
+          "type": "number"
+        },
+        "depth": {
+          "type": "number"
+        },
         "mode": {
           "type": "string"
         },
@@ -150,11 +168,15 @@ export const GENERATED_TOOL_MANIFEST: readonly ToolManifestEntry[] = [
         "keep_hf_hz": {
           "type": "number"
         },
-        "drive": {},
+        "drive": {
+          "type": "number"
+        },
         "cutoff_hz": {
           "type": "number"
         },
-        "resonance": {},
+        "resonance": {
+          "type": "number"
+        },
         "volume_db": {
           "type": "number"
         },
@@ -727,9 +749,7 @@ export const GENERATED_TOOL_MANIFEST: readonly ToolManifestEntry[] = [
     "inputSchema": {
       "type": "object",
       "properties": {
-        "value": {
-          "type": "string"
-        },
+        "value": {},
         "type": {
           "type": "string"
         },
@@ -1102,9 +1122,7 @@ export const GENERATED_TOOL_MANIFEST: readonly ToolManifestEntry[] = [
     "inputSchema": {
       "type": "object",
       "properties": {
-        "value": {
-          "type": "string"
-        },
+        "value": {},
         "path_filter": {
           "type": "string"
         },
@@ -2909,9 +2927,7 @@ export const GENERATED_TOOL_MANIFEST: readonly ToolManifestEntry[] = [
         "time": {
           "type": "number"
         },
-        "value": {
-          "type": "string"
-        },
+        "value": {},
         "easing": {
           "type": "number"
         },
@@ -3058,9 +3074,7 @@ export const GENERATED_TOOL_MANIFEST: readonly ToolManifestEntry[] = [
     "inputSchema": {
       "type": "object",
       "properties": {
-        "value": {
-          "type": "string"
-        },
+        "value": {},
         "node_path": {
           "type": "string"
         },
@@ -3242,7 +3256,10 @@ export const GENERATED_TOOL_MANIFEST: readonly ToolManifestEntry[] = [
     "inputSchema": {
       "type": "object",
       "properties": {
-        "direction": {},
+        "direction": {
+          "type": "object",
+          "additionalProperties": true
+        },
         "spread": {
           "type": "number"
         },
@@ -3252,7 +3269,10 @@ export const GENERATED_TOOL_MANIFEST: readonly ToolManifestEntry[] = [
         "initial_velocity_max": {
           "type": "number"
         },
-        "gravity": {},
+        "gravity": {
+          "type": "object",
+          "additionalProperties": true
+        },
         "scale_min": {
           "type": "number"
         },
@@ -3268,7 +3288,10 @@ export const GENERATED_TOOL_MANIFEST: readonly ToolManifestEntry[] = [
         "emission_sphere_radius": {
           "type": "number"
         },
-        "emission_box_extents": {},
+        "emission_box_extents": {
+          "type": "object",
+          "additionalProperties": true
+        },
         "emission_ring_radius": {
           "type": "number"
         },
@@ -3337,9 +3360,7 @@ export const GENERATED_TOOL_MANIFEST: readonly ToolManifestEntry[] = [
     "inputSchema": {
       "type": "object",
       "properties": {
-        "value": {
-          "type": "string"
-        },
+        "value": {},
         "key": {
           "type": "string"
         }
@@ -3358,9 +3379,7 @@ export const GENERATED_TOOL_MANIFEST: readonly ToolManifestEntry[] = [
     "inputSchema": {
       "type": "object",
       "properties": {
-        "value": {
-          "type": "string"
-        },
+        "value": {},
         "node_path": {
           "type": "string"
         },
@@ -3494,9 +3513,7 @@ export const GENERATED_TOOL_MANIFEST: readonly ToolManifestEntry[] = [
     "inputSchema": {
       "type": "object",
       "properties": {
-        "value": {
-          "type": "string"
-        },
+        "value": {},
         "node_path": {
           "type": "string"
         },
@@ -3679,8 +3696,12 @@ export const GENERATED_TOOL_MANIFEST: readonly ToolManifestEntry[] = [
           "type": "object",
           "additionalProperties": true
         },
-        "sun_angle_max": {},
-        "sky_curve": {},
+        "sun_angle_max": {
+          "type": "number"
+        },
+        "sky_curve": {
+          "type": "number"
+        },
         "ambient_light_color": {
           "type": "object",
           "additionalProperties": true
@@ -4343,9 +4364,7 @@ export const GENERATED_TOOL_MANIFEST: readonly ToolManifestEntry[] = [
     "inputSchema": {
       "type": "object",
       "properties": {
-        "value": {
-          "type": "string"
-        },
+        "value": {},
         "node_path": {
           "type": "string"
         },
