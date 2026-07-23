@@ -9,8 +9,10 @@ export interface ToolManifestEntry {
   risk?: 'read' | 'write' | 'destructive' | 'code';
 }
 
-export const TOOL_MANIFEST: readonly ToolManifestEntry[] = [];
+export { GENERATED_TOOL_MANIFEST as TOOL_MANIFEST } from './generated-manifest.js';
+
+import { GENERATED_TOOL_MANIFEST } from './generated-manifest.js';
 
 export function findTool(name: string): ToolManifestEntry | undefined {
-  return TOOL_MANIFEST.find((tool) => tool.name === name);
+  return GENERATED_TOOL_MANIFEST.find((tool) => tool.name === name);
 }

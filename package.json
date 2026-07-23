@@ -9,7 +9,7 @@
   "files": ["dist", "package.json"],
   "scripts": {
     "build": "tsc -p tsconfig.json",
-    "test": "npm run build && node --test test/*.test.mjs",
+    "test": "npm run build && node dist/scripts/generate-manifest.js && npm run build && node --test test/*.test.mjs",
     "check": "npm run build && npm test -- --test-only",
     "start": "node dist/src/main.js",
     "generate-manifest": "node dist/scripts/generate-manifest.js"
