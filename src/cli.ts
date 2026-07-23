@@ -117,6 +117,7 @@ function parseAliasOptions(args: string[], tool: ToolManifestEntry): { params: R
   const properties = (tool.inputSchema.properties ?? {}) as Record<string, { type?: string }>;
   const params: Record<string, unknown> = {};
   let json = false;
+  let jsonSeen = false;
   let timeoutMs: number | undefined;
   for (let index = 0; index < args.length; index += 1) {
     const token = args[index];
@@ -125,10 +126,13 @@ function parseAliasOptions(args: string[], tool: ToolManifestEntry): { params: R
     if (!option) throw new CliUsageError('Empty option name');
     if (option === 'json') {
       if (token.includes('=')) throw new CliUsageError('--json does not take a value');
+      if (jsonSeen) throw new CliUsageError('--json was specified more than once');
+      jsonSeen = true;
       json = true;
       continue;
     }
     if (option === 'timeout' || option.startsWith('timeout=')) {
+      if (timeoutMs !== undefined) throw new CliUsageError('--timeout was specified more than once');
       const inline = option.startsWith('timeout=') ? option.slice('timeout='.length) : undefined;
       const raw = inline ?? args[++index];
       timeoutMs = parsePositiveInteger(raw, '--timeout');
@@ -160,14 +164,18 @@ function parseAliasOptions(args: string[], tool: ToolManifestEntry): { params: R
 
 function parseGlobalOptions(args: string[]): { json: boolean; timeoutMs?: number } {
   let json = false;
+  let jsonSeen = false;
   let timeoutMs: number | undefined;
   for (let index = 0; index < args.length; index += 1) {
     const token = args[index];
     if (token === '--json') {
+      if (jsonSeen) throw new CliUsageError('--json was specified more than once');
+      jsonSeen = true;
       json = true;
       continue;
     }
     if (token === '--timeout' || token.startsWith('--timeout=')) {
+      if (timeoutMs !== undefined) throw new CliUsageError('--timeout was specified more than once');
       const raw = token.startsWith('--timeout=') ? token.slice('--timeout='.length) : args[++index];
       timeoutMs = parsePositiveInteger(raw, '--timeout');
       continue;
