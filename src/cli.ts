@@ -3,6 +3,7 @@ import { CliUsageError, formatError } from './errors.js';
 import { GodotWebSocketBridge, type BridgeStatus } from './godot-websocket-bridge.js';
 import { findTool, TOOL_MANIFEST, type ToolManifestEntry } from './manifest.js';
 import { SerialScheduler } from './serial-scheduler.js';
+import { RequestLogger } from './request-logger.js';
 
 export const VERSION = '0.1.0';
 
@@ -93,7 +94,16 @@ export async function executeCli(request: CliRequest, dependencies: CliDependenc
   try {
     if (request.kind === 'status' || request.kind === 'doctor') {
       const status = bridge.status();
-      const result = { ...status, tool_count: TOOL_MANIFEST.length };
+      const logger = new RequestLogger({ stateDir: config.stateDir, port: config.port });
+      const result = {
+        ...status,
+        tool_count: TOOL_MANIFEST.length,
+        state_dir: logger.stateDir,
+        log_file: logger.logFile,
+        artifact_dir: logger.artifactDir,
+        recent_logs: logger.recent(10),
+        recent_errors: logger.recentErrors(10),
+      };
       stdout(`${request.json ? JSON.stringify(result) : formatStatus(result)}\n`);
       return;
     }
@@ -219,8 +229,8 @@ function parseOptionValue(name: string, raw: string, type?: string): unknown {
   return raw;
 }
 
-function formatStatus(status: BridgeStatus & { tool_count: number }): string {
-  return `connected=${status.connected} session=${status.session ?? 'none'} host=${status.host} port=${status.port} pending=${status.pending} tool_count=${status.tool_count}`;
+function formatStatus(status: BridgeStatus & { tool_count: number; state_dir: string; log_file: string; artifact_dir: string }): string {
+  return `connected=${status.connected} session=${status.session ?? 'none'} host=${status.host} port=${status.port} pending=${status.pending} tool_count=${status.tool_count} state_dir=${status.state_dir} log_file=${status.log_file} artifact_dir=${status.artifact_dir}`;
 }
 
 function formatResult(result: unknown): string {

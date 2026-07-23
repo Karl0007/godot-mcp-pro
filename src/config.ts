@@ -1,9 +1,12 @@
+import { join, resolve } from 'node:path';
+
 export interface BridgeConfig {
   host: string;
   port: number;
   connectionTimeoutMs: number;
   requestTimeoutMs: number;
   logLevel: 'silent' | 'error' | 'info' | 'debug';
+  stateDir: string;
 }
 
 const DEFAULT_CONFIG: BridgeConfig = {
@@ -12,6 +15,7 @@ const DEFAULT_CONFIG: BridgeConfig = {
   connectionTimeoutMs: 10_000,
   requestTimeoutMs: 30_000,
   logLevel: 'error',
+  stateDir: resolve(join(process.cwd(), '.godot-mcp')),
 };
 
 function positiveInt(value: string | undefined, fallback: number): number {
@@ -37,5 +41,6 @@ export function loadConfig(env: NodeJS.ProcessEnv = process.env): BridgeConfig {
     connectionTimeoutMs: positiveInt(env.GODOT_MCP_PRO_CONNECTION_TIMEOUT, DEFAULT_CONFIG.connectionTimeoutMs),
     requestTimeoutMs: positiveInt(env.GODOT_MCP_PRO_REQUEST_TIMEOUT, DEFAULT_CONFIG.requestTimeoutMs),
     logLevel: logLevel as BridgeConfig['logLevel'],
+    stateDir: resolve(env.GODOT_MCP_PRO_STATE_DIR || DEFAULT_CONFIG.stateDir),
   };
 }

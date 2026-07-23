@@ -18,7 +18,7 @@ async function runMcpServer(): Promise<void> {
   });
   await bridge.start();
 
-  const server = createMcpServer(bridge, new SerialScheduler());
+  const server = createMcpServer(bridge, new SerialScheduler(), { stateDir: config.stateDir, port: config.port });
   server.onclose = () => {
     void bridge.stop();
   };

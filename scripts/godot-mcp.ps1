@@ -127,7 +127,7 @@ function Set-ProjectPort {
     $projectFile = Join-Path $ProjectPath 'project.godot'
     $content = [IO.File]::ReadAllText($projectFile)
     $bom = $false
-    while ($content.StartsWith([char]0xFEFF)) {
+    while ($content.Length -gt 0 -and $content[0] -eq [char]0xFEFF) {
         $bom = $true
         $content = $content.Substring(1)
     }
@@ -178,7 +178,10 @@ function Write-McpConfig([string]$OutputPath) {
             'godot-mcp-pro' = [ordered]@{
                 command = 'node'
                 args = @((Join-Path $RootDir 'dist/src/main.js'))
-                env = [ordered]@{ GODOT_MCP_PRO_PORT = [string]$Port }
+                env = [ordered]@{
+                    GODOT_MCP_PRO_PORT = [string]$Port
+                    GODOT_MCP_PRO_STATE_DIR = (Join-Path $ProjectPath '.godot-mcp')
+                }
             }
         }
     }
@@ -227,6 +230,21 @@ function Run-Doctor {
         if (Test-Path -LiteralPath $outputPath -PathType Leaf) { Write-Host "[info] MCP config fragment: $outputPath"; Get-Content -LiteralPath $outputPath } else { Write-Host "[info] MCP config fragment not generated: $outputPath" }
     } else {
         Write-Host '[info] no target project supplied or registered'
+    }
+    $stateDir = if ($ProjectPath) { Join-Path $ProjectPath '.godot-mcp' } else { Join-Path $RootDir '.godot-mcp' }
+    $logFile = Join-Path $stateDir "logs/bridge-$Port.jsonl"
+    $artifactDir = Join-Path $stateDir 'artifacts'
+    Write-Host "[info] state_dir: $stateDir"
+    Write-Host "[info] log_file: $logFile"
+    Write-Host "[info] artifact_dir: $artifactDir"
+    if (Test-Path -LiteralPath $logFile -PathType Leaf) {
+        $recentErrors = @(Get-Content -LiteralPath $logFile -Tail 50 | ForEach-Object {
+            try { $entry = $_ | ConvertFrom-Json; if ($entry.direction -eq 'error') { $entry } } catch { }
+        } | Select-Object -Last 10)
+        if ($recentErrors.Count -gt 0) {
+            Write-Host '[info] recent_errors:'
+            $recentErrors | ForEach-Object { Write-Host (($_ | ConvertTo-Json -Compress)) }
+        }
     }
     $state = if (Test-PortOccupied $Port) { 'occupied' } else { 'free' }
     $level = if ($state -eq 'occupied') { 'warning' } else { 'ok' }

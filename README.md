@@ -50,7 +50,8 @@ dist/src/main.js
       "command": "node",
       "args": ["C:/Godot/MCP/godot-mcp-pro/dist/src/main.js"],
       "env": {
-        "GODOT_MCP_PRO_PORT": "6505"
+        "GODOT_MCP_PRO_PORT": "6505",
+        "GODOT_MCP_PRO_STATE_DIR": "C:/Games/GameA/.godot-mcp"
       }
     }
   }
@@ -143,7 +144,16 @@ GODOT_MCP_PRO_PORT                  默认 6505，范围 6505-6509
 GODOT_MCP_PRO_CONNECTION_TIMEOUT   默认 10000 ms
 GODOT_MCP_PRO_REQUEST_TIMEOUT       默认 30000 ms
 GODOT_MCP_PRO_LOG_LEVEL             silent/error/info/debug，默认 error
+GODOT_MCP_PRO_STATE_DIR              默认当前目录/.godot-mcp
 ```
+
+每个项目的安装脚本会把 `GODOT_MCP_PRO_STATE_DIR` 写入生成的 MCP 配置。日志位于：
+
+```text
+<Game>/.godot-mcp/logs/bridge-<port>.jsonl
+```
+
+每次 MCP `tools/list`、`tools/call` 都会记录请求、响应或错误、耗时和响应字节数。图片 Base64、帧数组和脚本代码只记录摘要，不写入日志。
 
 ## 6. Agent 工作流
 
@@ -185,8 +195,26 @@ stop_scene
 - 不要直接编辑 `project.godot`，使用项目设置工具。
 - 删除、批量修改或执行脚本前确认目标和副作用。
 - CLI 不提供通用 `call`、`invoke` 或 `exec`；Agent 使用 MCP 工具。
+- 场景或脚本操作异常时，先调用 `get_editor_errors`，再用 `get_output_log` 查看有限行数的日志。
+- `capture_frames` 返回 MCP 图片内容，同时将 PNG 保存到 `.godot-mcp/artifacts/<request-id>/`；不要把帧数组转发为普通文本。
+- `start_recording`/`stop_recording` 记录输入事件，不是视频录制；事件只在结果中返回，不自动保存文件。
 
-## 7. 诊断和 CLI
+## 7. 日志和 artifacts
+
+```text
+<Game>/.godot-mcp/logs/bridge-<port>.jsonl
+<Game>/.godot-mcp/artifacts/<request-id>/frame-001.png
+```
+
+日志由 bridge 自动写入，包含 MCP 请求、响应、错误、耗时和字节数。用 `doctor --json` 查看 `state_dir`、`log_file`、`artifact_dir` 和最近错误：
+
+```bash
+node dist/src/main.js doctor --json
+```
+
+`capture_frames` 的每帧会同时作为 MCP `image` content 返回，并保存为 PNG artifact；普通 `get_editor_screenshot`/`get_game_screenshot` 不指定 `save_path` 时只返回 MCP 图片，不留下持久文件。需要持久化单张截图时传入 `save_path`，例如 `res://debug/game.png`。
+
+## 8. 诊断和 CLI
 
 一键诊断：
 
@@ -209,7 +237,7 @@ node dist/src/main.js project info --json
 node dist/src/main.js project tree --json
 ```
 
-## 8. 故障排查
+## 9. 故障排查
 
 ### 未连接 Godot
 

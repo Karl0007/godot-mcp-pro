@@ -195,12 +195,13 @@ NODE
 write_mcp_config() {
   output_path=$1
   mkdir -p "$(dirname -- "$output_path")"
-  node - "$output_path" "$ROOT_DIR/dist/src/main.js" "$PORT" <<'NODE'
+  node - "$output_path" "$ROOT_DIR/dist/src/main.js" "$PORT" "$PROJECT_PATH" <<'NODE'
 const fs = require('node:fs');
 const path = process.argv[2];
 const entry = process.argv[3];
 const port = process.argv[4];
-const config = {mcpServers: {'godot-mcp-pro': {command: 'node', args: [entry], env: {GODOT_MCP_PRO_PORT: String(port)}}}};
+const project = process.argv[5];
+const config = {mcpServers: {'godot-mcp-pro': {command: 'node', args: [entry], env: {GODOT_MCP_PRO_PORT: String(port), GODOT_MCP_PRO_STATE_DIR: `${project}/.godot-mcp`}}}};
 fs.writeFileSync(path, `${JSON.stringify(config, null, 2)}\n`, 'utf8');
 NODE
   printf 'MCP config fragment: %s\n' "$output_path"
@@ -248,6 +249,18 @@ run_doctor() {
     if [ -f "$output_path" ]; then printf '[info] MCP config fragment: %s\n' "$output_path"; cat "$output_path"; else printf '[info] MCP config fragment not generated: %s\n' "$output_path"; fi
   else
     printf '[info] no target project supplied or registered\n'
+  fi
+  if [ -n "$PROJECT_PATH" ]; then state_dir="$PROJECT_PATH/.godot-mcp"; else state_dir="$ROOT_DIR/.godot-mcp"; fi
+  log_file="$state_dir/logs/bridge-$PORT.jsonl"
+  artifact_dir="$state_dir/artifacts"
+  printf '[info] state_dir: %s\n' "$state_dir"
+  printf '[info] log_file: %s\n' "$log_file"
+  printf '[info] artifact_dir: %s\n' "$artifact_dir"
+  if [ -f "$log_file" ]; then
+    recent_errors=$(grep '"direction":"error"' "$log_file" | tail -10 || true)
+    if [ -n "$recent_errors" ]; then
+      printf '[info] recent_errors:\n%s\n' "$recent_errors"
+    fi
   fi
   state=$(port_state "$PORT")
   printf '[%s] 127.0.0.1:%s (%s)\n' "$([ "$state" = occupied ] && printf warning || printf ok)" "$PORT" "$state"
