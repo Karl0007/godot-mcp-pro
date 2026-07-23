@@ -1,10 +1,8 @@
 @tool
 extends Node
 
-## Multi-connection WebSocket client.
-## Connects to multiple Node.js MCP server instances on ports 6505-6514.
-## Each Claude Code session gets its own port; Godot talks to all of them.
-## Ports 6505-6509: MCP servers (stdio), 6510-6514: CLI tool connections.
+## Project-specific WebSocket client.
+## Connects to the Node.js MCP server configured by the project bridge port.
 
 signal client_connected()
 signal client_disconnected()
@@ -14,8 +12,10 @@ signal command_completed(method: String, success: bool, response: String, source
 
 var command_router: Node
 
-const BASE_PORT := 6505
-const MAX_PORT := 6514
+const BRIDGE_PORT_SETTING := "godot_mcp/bridge_port"
+const DEFAULT_BRIDGE_PORT := 6505
+const MIN_BRIDGE_PORT := 6505
+const MAX_BRIDGE_PORT := 6509
 const RECONNECT_INTERVAL := 3.0
 const BUFFER_SIZE := 16 * 1024 * 1024  # 16MB
 const PING_INTERVAL := 5.0  # send ping every N seconds while connected
@@ -30,15 +30,28 @@ var _last_activity: Dictionary = {}  # port -> float (seconds since last receive
 var _ping_timers: Dictionary = {}  # port -> float (seconds since last sent ping)
 var _stale_ports: Dictionary = {}  # port -> bool (heartbeat timeout flag, exposed to UI)
 var _running: bool = false
+var _bridge_port: int = DEFAULT_BRIDGE_PORT
+
+
+func get_bridge_port() -> int:
+	return _bridge_port
+
+
+func _resolve_bridge_port() -> int:
+	var configured_port: Variant = ProjectSettings.get_setting(BRIDGE_PORT_SETTING, DEFAULT_BRIDGE_PORT)
+	if typeof(configured_port) == TYPE_INT and configured_port >= MIN_BRIDGE_PORT and configured_port <= MAX_BRIDGE_PORT:
+		return configured_port
+	push_warning("[MCP] Invalid %s value %s; falling back to port %d" % [BRIDGE_PORT_SETTING, str(configured_port), DEFAULT_BRIDGE_PORT])
+	return DEFAULT_BRIDGE_PORT
 
 
 func start_server() -> void:
+	_bridge_port = _resolve_bridge_port()
 	_running = true
-	for p in range(BASE_PORT, MAX_PORT + 1):
-		_connected[p] = false
-		_timers[p] = 0.0
-		_try_connect(p)
-	print("[MCP] Connecting to ports %d-%d" % [BASE_PORT, MAX_PORT])
+	_connected[_bridge_port] = false
+	_timers[_bridge_port] = 0.0
+	_try_connect(_bridge_port)
+	print("[MCP] Connecting to port %d" % _bridge_port)
 
 
 func stop_server() -> void:
@@ -99,7 +112,7 @@ func _process(delta: float) -> void:
 	if not _running:
 		return
 
-	for p in range(BASE_PORT, MAX_PORT + 1):
+	for p: int in [_bridge_port]:
 		var ws: WebSocketPeer = _peers.get(p)
 
 		# No peer - try reconnect on timer

@@ -2,12 +2,31 @@
 
 给 Agent 的安装和使用说明。
 
-## 1. 安装
+## 1. 一键安装
 
-要求 Node.js 18+。
+要求 Node.js 18+、Git；目标 Godot 项目必须包含 `project.godot`。
+
+Windows PowerShell：
+
+```powershell
+.\scripts\godot-mcp.ps1 install -ProjectPath C:\Games\GameA -Port 6505 -Yes
+```
+
+POSIX shell：
 
 ```bash
-cd C:/Godot/MCP/godot-mcp-pro
+./scripts/godot-mcp.sh install --project-path ~/Games/GameA --port 6505 --yes
+```
+
+脚本会初始化 addon submodule、安装 npm 依赖、构建 bridge、复制 addon、写入项目端口，并生成：
+
+```text
+<GameA>/.godot-mcp/mcp-config.json
+```
+
+手动安装或排查：
+
+```bash
 git submodule update --init --recursive
 npm ci
 npm run build
@@ -64,20 +83,43 @@ git commit -m "同步 Godot addon 上游更新"
 
 在目标 Godot 项目中：
 
-1. 从 `vendor/godot-mcp-addon/addons/godot_mcp` 复制插件到目标项目的 `addons/godot_mcp`。
+1. `install`/`update` 会将 `vendor/godot-mcp-addon/addons/godot_mcp` 复制到目标项目的 `addons/godot_mcp`。
 2. 打开项目。
 3. 在 `Project > Project Settings > Plugins` 启用 `Godot MCP Pro`。
-4. 保持 MCP 客户端中的 `GODOT_MCP_PRO_PORT` 与 Bridge 端口一致。
+4. 项目设置 `godot_mcp/bridge_port` 必须与 MCP 配置中的 `GODOT_MCP_PRO_PORT` 一致。
 
-插件会连接本机 `127.0.0.1:6505-6514`。Bridge 实例可使用 `6505-6509`，每个 Bridge 实例使用不同端口。
+插件只连接项目设置指定的一个端口，默认 `6505`，可用范围 `6505-6509`。
 
 ## 5. 启动顺序
 
 ```text
-1. 启动 Godot 项目并启用 Godot MCP Pro 插件
-2. 启动 MCP 客户端
-3. MCP 客户端启动 dist/src/main.js
-4. Agent 通过 MCP 使用 174 个 Godot 工具
+1. 运行 install 脚本
+2. 启动目标 Godot 项目并启用 Godot MCP Pro 插件
+3. 将 .godot-mcp/mcp-config.json 合并到 MCP 客户端配置
+4. MCP 客户端启动 dist/src/main.js
+5. Agent 通过 MCP 使用 174 个 Godot 工具
+```
+
+多项目使用不同端口：
+
+```powershell
+.\scripts\godot-mcp.ps1 install -ProjectPath C:\Games\GameA -Port 6505 -Yes
+.\scripts\godot-mcp.ps1 install -ProjectPath C:\Games\GameB -Port 6506 -Yes
+```
+
+更新 bridge；指定 `ProjectPath` 时同步该 Godot 项目：
+
+```powershell
+.\scripts\godot-mcp.ps1 update
+# 需要同步 addon fork 的 upstream/master 时：
+.\scripts\godot-mcp.ps1 update -AddonUpstream
+```
+
+POSIX shell 使用同名命令和长参数：
+
+```bash
+./scripts/godot-mcp.sh update
+./scripts/godot-mcp.sh doctor
 ```
 
 手动启动 Bridge：
@@ -144,7 +186,17 @@ stop_scene
 - 删除、批量修改或执行脚本前确认目标和副作用。
 - CLI 不提供通用 `call`、`invoke` 或 `exec`；Agent 使用 MCP 工具。
 
-## 7. CLI 检查
+## 7. 诊断和 CLI
+
+一键诊断：
+
+```powershell
+.\scripts\godot-mcp.ps1 doctor -ProjectPath C:\Games\GameA -Port 6505
+```
+
+```bash
+./scripts/godot-mcp.sh doctor --project-path ~/Games/GameA --port 6505
+```
 
 CLI 只提供显式领域别名：
 

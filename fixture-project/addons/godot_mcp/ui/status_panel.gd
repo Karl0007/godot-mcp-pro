@@ -12,8 +12,7 @@ const COLOR_SUCCESS := Color(0.6, 1, 0.6)
 const COLOR_ERROR := Color(1, 0.6, 0.6)
 const COLOR_DIM := Color(0.6, 0.6, 0.6)
 
-const BASE_PORT := 6505
-const MAX_PORT := 6509
+const DEFAULT_BRIDGE_PORT := 6505
 
 # Header
 var _status_icon: Label
@@ -135,20 +134,22 @@ func _build_clients_tab() -> void:
 	vbox.name = "Clients"
 	_tab_container.add_child(vbox)
 
-	for p in range(BASE_PORT, MAX_PORT + 1):
-		var row := HBoxContainer.new()
-		vbox.add_child(row)
+	var bridge_port: int = int(ProjectSettings.get_setting("godot_mcp/bridge_port", DEFAULT_BRIDGE_PORT))
+	if bridge_port < 6505 or bridge_port > 6509:
+		bridge_port = DEFAULT_BRIDGE_PORT
+	var row := HBoxContainer.new()
+	vbox.add_child(row)
 
-		var icon := Label.new()
-		icon.text = "○"
-		icon.add_theme_color_override("font_color", COLOR_DISCONNECTED)
-		row.add_child(icon)
+	var icon := Label.new()
+	icon.text = "○"
+	icon.add_theme_color_override("font_color", COLOR_DISCONNECTED)
+	row.add_child(icon)
 
-		var lbl := Label.new()
-		lbl.text = "  Port %d  —  Disconnected" % p
-		row.add_child(lbl)
+	var lbl := Label.new()
+	lbl.text = "  Port %d  —  Disconnected" % bridge_port
+	row.add_child(lbl)
 
-		_port_labels[p] = {"icon": icon, "label": lbl}
+	_port_labels[bridge_port] = {"icon": icon, "label": lbl}
 
 
 func _build_tools_tab() -> void:
@@ -217,11 +218,8 @@ func _process(_delta: float) -> void:
 	_client_count_label.text = "Clients: %d" % count
 
 	var any_stale := false
-	if websocket_server.has_method("is_port_stale"):
-		for p in range(BASE_PORT, MAX_PORT + 1):
-			if websocket_server.is_port_stale(p):
-				any_stale = true
-				break
+	if websocket_server.has_method("is_port_stale") and websocket_server.has_method("get_bridge_port"):
+		any_stale = websocket_server.is_port_stale(websocket_server.get_bridge_port())
 
 	if count > 0:
 		_status_icon.add_theme_color_override("font_color", COLOR_CONNECTED)

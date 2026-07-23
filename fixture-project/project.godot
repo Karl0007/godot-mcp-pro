@@ -1,4 +1,4 @@
-; Engine configuration file.
+ Engine configuration file.
 ; It's best edited using the editor UI and not directly,
 ; since the parameters that go here are not all obvious.
 ;
@@ -34,3 +34,7 @@ project/assembly_name="Godot MCP Pro Fixture"
 [editor_plugins]
 
 enabled=PackedStringArray("res://addons/godot_mcp/plugin.cfg")
+
+[godot_mcp]
+
+bridge_port=6509
