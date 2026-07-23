@@ -1,0 +1,3 @@
+[submodule "vendor/godot-mcp-addon"]
+	path = vendor/godot-mcp-addon
+	url = https://github.com/Karl0007/godot-mcp-addon.git

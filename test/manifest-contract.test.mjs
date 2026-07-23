@@ -4,7 +4,7 @@ import { readdirSync, readFileSync } from 'node:fs';
 import { join, resolve } from 'node:path';
 import { TOOL_MANIFEST } from '../dist/src/manifest.js';
 
-const addonPath = resolve(process.env.GODOT_MCP_PRO_ADDON_PATH ?? 'C:/Godot/MCP/godot-mcp-pro/addons/godot_mcp');
+const addonPath = resolve(process.env.GODOT_MCP_PRO_ADDON_PATH ?? join(process.cwd(), 'vendor/godot-mcp-addon/addons/godot_mcp'));
 const commandsPath = join(addonPath, 'commands');
 
 function sourceCommandNames() {

@@ -1,4 +1,4 @@
-// Generated from C:/Godot/MCP/godot-mcp-pro/addons/godot_mcp/commands by scripts/generate-manifest.ts.
+// Generated from C:/Godot/MCP/godot-mcp-pro/vendor/godot-mcp-addon/addons/godot_mcp/commands by scripts/generate-manifest.ts.
 import type { ToolManifestEntry } from './manifest.js';
 
 export const GENERATED_TOOL_MANIFEST: readonly ToolManifestEntry[] = [

@@ -1,5 +1,5 @@
 {
-  "name": "godot-mcp-pro-bridge",
+  "name": "godot-mcp-pro",
   "version": "0.1.0",
   "description": "MCP and explicit CLI bridge for Godot MCP Pro editor tools",
   "type": "module",
